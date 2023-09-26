@@ -4,12 +4,12 @@ var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
 
 const allocator = arena.allocator();
 
-pub fn LinkedList(comptime Value: type) type {
+pub fn LinkedList(comptime T: type) type {
     return struct {
         const This = @This();
 
         const Node = struct {
-            value: Value,
+            value: T,
             next: ?*Node,
         };
 
@@ -17,13 +17,13 @@ pub fn LinkedList(comptime Value: type) type {
         tail: ?*Node,
 
         pub fn init() This {
-            return LinkedList(Value) {
+            return LinkedList(T) {
                 .head = null,
                 .tail = null,
             };
         }
 
-        pub fn add(this: *This, value: Value) !void {
+        pub fn add(this: *This, value: T) !void {
             var newNode = try allocator.create(Node);
 
             newNode.* = .{ .value = value, .next = null };
@@ -66,8 +66,12 @@ test "basic test" {
 
     var h = l1.head;
 
-    try std.testing.expectEqual(h.?.*.value, 1);
-    try std.testing.expectEqual(h.?.*.next.?.*.value, 2);
-    try std.testing.expectEqual(h.?.*.next.?.*.next.?.*.value, 4);
-    try std.testing.expectEqual(h.?.*.next.?.*.next.?.*.next.?.*.value, 3);
+    const items = [_]i32 { 1, 2, 4, 3 };
+
+    for (items) |item| {
+        try std.testing.expectEqual(h.?.*.value, item);
+        h = h.?.*.next;
+    }
+
+    try std.testing.expectEqual(h, null);
 }
