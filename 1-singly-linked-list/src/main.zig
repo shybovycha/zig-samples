@@ -64,14 +64,23 @@ test "basic test" {
     try l1.add(4);
     try l1.add(3);
 
-    var h = l1.head;
+    var head = l1.head;
 
-    const items = [_]i32 { 1, 2, 4, 3 };
+    const expected_values = [_]i32 { 1, 2, 4, 3 };
 
-    for (items) |item| {
-        try std.testing.expectEqual(h.?.*.value, item);
-        h = h.?.*.next;
+    for (expected_values) |expected_value| {
+        if (head) |p_head| {
+            const h = p_head.*;
+
+            try std.testing.expectEqual(h.value, expected_value);
+
+            head = h.next;
+
+            continue;
+        }
+
+        try std.testing.expect(false);
     }
 
-    try std.testing.expectEqual(h, null);
+    try std.testing.expectEqual(head, null);
 }
